@@ -13,7 +13,7 @@ public class SceneViewEditor : Editor
     }
 
     static Vector3 handlePosition;
-
+    static Vector3 handleOffset;
 
 
 
@@ -21,6 +21,8 @@ public class SceneViewEditor : Editor
     {
         SceneView.onSceneGUIDelegate += OnSceneGUI;
         // SceneView.beforeSceneGui or SceneView.duringSceneGui in newer version!
+
+        EditorApplication.update += OnUpdate;
     }
 
     static void OnSceneGUI(SceneView sceneView)
@@ -38,7 +40,7 @@ public class SceneViewEditor : Editor
         HandleUtility.AddDefaultControl(controlId);
 
         UpdateHandlePosition();
-        
+
         if (Event.current.type == EventType.MouseDown
         && Event.current.button == 0)
         {
@@ -46,9 +48,22 @@ public class SceneViewEditor : Editor
             Debug.Log("Left mouse button down");
         }
 
-        DrawHandle(handlePosition);
+        DrawHandle(handlePosition + handleOffset);
 
         SceneView.RepaintAll();
+    }
+
+    static void OnUpdate()
+    {
+        if (EditorApplication.isPlaying
+        || EditorApplication.isPlayingOrWillChangePlaymode
+        || EditorApplication.isPaused
+        || EditorApplication.isCompiling
+        || EditorApplication.isUpdating) return;
+
+        if (!EnableEditor) return;
+
+        handleOffset = Vector3.up * Mathf.Sin(Time.realtimeSinceStartup * 5f) * 0.1f;
     }
 
     static void UpdateHandlePosition()
